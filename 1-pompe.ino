@@ -1,13 +1,9 @@
-// include in alphabetical order
-#include <List.hpp>
+// include in alphabetical ordermd::warning
 
 class Pompe {
 
 public:
   int pin = 0;
-
-  String name = "undef";
-
   int state = 0;
   int defaultState = 0;
 
@@ -15,43 +11,53 @@ public:
   unsigned long startTime = 0;
   unsigned long endTime = 0;
 
-  Pompe()
-  {
+  // having a string as member seems to be problematic ?!
+
+  Pompe() {
+    md::info("Create dummy pompe");
   }
 
-  Pompe(int newPin)
-  {
-    setup(newPin);
+  Pompe(int newPin) {
+    mysetup(newPin);
   }
 
-  void setup(int newPin) {
+  void mysetup(int newPin) {
+    if (newPin == 4 || newPin > 9) {
+      md::warning("The pin assignment can enter in conflict with the ethernet shield!");
+    }
     pin = newPin;
     pinMode(pin, OUTPUT);
   }
 
   void print() {
-    Serial << "pompe: " << pin << ", state: " << state << '\n';
+    char buffer[50];
+    snprintf(buffer, sizeof(buffer), "pompe: pin %d, state: %d", pin, state);
+    md::info(buffer);
   }
 
   void setStateFor(int newState, unsigned long time) {
     state = newState;
-    Serial << "pompe " << pin << ", set state to: " << state << '\n';
     startTime = millis();
     currentTime = millis();
     endTime = startTime + time;
     digitalWrite(pin, state);
-    Serial << "pompe " << pin << ", set state to: " << state << " until :" << endTime << " current time: " << currentTime << '\n';
+
+    char buffer[100];
+    snprintf(buffer, sizeof(buffer), "pompe %d, set state to: %d until: %lu current time: %lu", pin, state, endTime, currentTime);
+    md::info(buffer);
   }
 
   void checkTiming() {
-   
     currentTime = millis();
-    //Serial << "pompe" << pin << ", state: " << state << " until :" << endTime << " current time: " << currentTime << '\n';
     if (state != defaultState && currentTime >= endTime) {
-      Serial << "pompe" << pin << ", timeout -> set state to: " << defaultState << '\n';
       digitalWrite(pin, defaultState);
       state = defaultState;
+
+      char buffer[50];
+      snprintf(buffer, sizeof(buffer), "pompe %d, state reset to default: %d", pin, defaultState);
+      md::info(buffer);
     }
   }
 };
+
 
