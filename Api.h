@@ -6,4 +6,7 @@
 
 void handleRoot(EthernetClient& client);
 
+void okResponse(EthernetClient& client);
+void failResponse(EthernetClient& client);
+
 #endif // API_H
