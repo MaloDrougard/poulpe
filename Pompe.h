@@ -7,6 +7,7 @@ class Pompe {
 public:
     Pompe();
     void mysetup(int pin);
+    // duration in second
     void setStateFor(int state, unsigned long duration);
     void checkTiming();
     void print();

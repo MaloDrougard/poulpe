@@ -16,9 +16,9 @@ void Pompe::mysetup(int pin) {
 }
 
 void Pompe::setStateFor(int state, unsigned long duration) {
-    info("Setting pump " + String(pin) + " HIGH for duration " + String(duration) + "ms");
     this->state = state;
-    this->duration = duration;
+    this->duration = duration * 1000;
+    info("Setting pump " + String(pin) + " HIGH for duration " + String(duration) + "s");
     this->startTime = millis();
     digitalWrite(pin, state);
 }
@@ -79,7 +79,7 @@ void pmChecking() {
     String strPompeIdx = command.substring(0, splitPos);
     int pompeIdx = strPompeIdx.toInt();
     String strTime = command.substring(splitPos + 1, command.length());
-    unsigned long time = strTime.toInt();  // command is time in millisec, important not to use int because of the buffer overflow
+    unsigned long time = (unsigned long)strTime.toInt();  // Convert String to unsigned int
   
     if (pompeIdx >= pmSize) {
       snprintf(buffer, sizeof(buffer), "out of bound index: %d", pompeIdx);
@@ -94,4 +94,3 @@ void pmChecking() {
   
     return 0;
   }
-  

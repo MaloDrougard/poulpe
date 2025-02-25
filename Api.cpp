@@ -44,9 +44,9 @@ void handleRoot(EthernetClient& client) {
             int tIndex = request.indexOf("t=");
             if (pIndex >= 0 && tIndex >= 0) {
                 int pValue = request.substring(pIndex + 2, request.indexOf('&', pIndex)).toInt();
-                int tValue = request.substring(tIndex + 2, request.indexOf(' ', tIndex)).toInt();
+                long tValue = request.substring(tIndex + 2, request.indexOf(' ', tIndex)).toInt();
                 if (pValue >= 0 && pValue < pmSize) {
-                    pm[pValue].setStateFor(HIGH, tValue * 1000);
+                    pm[pValue].setStateFor(HIGH, tValue);
                     okResponse(client);
                 } else {
                     failResponse(client, "Invalid pump index");
