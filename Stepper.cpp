@@ -12,13 +12,19 @@ void setupStepper() {
     // Set the spinning direction clockwise:
     digitalWrite(dirPin, HIGH);
     stepToPerform = 0;
-  }
+    position = 0;
+}
 
 
 void rotation(double rotation) {
     // Calculate the number of steps for the stepper motor
     stepToPerform = (int) (stepsPerRevolution * rotation);
     info("Rotation: " + String(rotation) + ", new steps: " + String(stepToPerform));
+}
+
+void resetInitalPosition() {
+    stepToPerform = -position;
+    info("Resetting position to origin, steps: " + String(stepToPerform));
 }
 
 void performOneStep() {
@@ -41,7 +47,9 @@ void onestepClockwise() {
     delayMicroseconds(stepSpeed);
     digitalWrite(stepPin, LOW);
     delayMicroseconds(stepSpeed);
-    delayMicroseconds(delayAfterSetp); // to slow down the rotation    
+    delayMicroseconds(delayAfterSetp); // to slow down the rotation 
+    
+    position++;
 }
 
 void onestepAntiClockwise() {
@@ -55,4 +63,6 @@ void onestepAntiClockwise() {
     digitalWrite(stepPin, LOW);
     delayMicroseconds(stepSpeed);
     delayMicroseconds(delayAfterSetp); // to slow down the rotation    
+
+    position--;
 }

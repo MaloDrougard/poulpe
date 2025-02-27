@@ -55,11 +55,16 @@ void    handleRoot(EthernetClient& client) {
              } else {
                 failResponse(client, "Error parsing parameters");
             }
-        } else if (request.indexOf("GET /rotation") >= 0) {
+        } else if (request.indexOf("GET /stepper") >= 0) {
             int rIndex = request.indexOf("r=");
+            int resetIndex = request.indexOf("reset");
             if (rIndex >= 0) {
                 double rValue = request.substring(rIndex + 2, request.indexOf(' ', rIndex)).toDouble();
                 rotation(rValue);
+                okResponse(client);
+            }
+            else if (resetIndex >= 0) {
+                resetInitalPosition();
                 okResponse(client);
             }
             else {

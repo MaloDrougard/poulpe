@@ -14,11 +14,13 @@
 void setupStepper();
 void rotation(double rotation); // 1 rotation = 360 degrees = 200 steps, -1 rotation = -360 degrees = -200 steps
 void performOneStep();
+void resetInitalPosition();
 
 void onestepClockwise();
 void onestepAntiClockwise();
 
 
 static int stepToPerform; // number of steps to perform, if = 0 then no rotation
+static long int position; // current position of the stepper motor relative to the initial position
 
 #endif // STEPPER_H
