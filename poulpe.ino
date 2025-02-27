@@ -5,6 +5,7 @@
 #include "Pompe.h"
 #include "Log.h"
 #include "Api.h"
+#include "Stepper.h"
 
 using namespace mylog; 
 
@@ -15,8 +16,8 @@ using namespace mylog;
 DIGITAL:
   00 : none
   01 : none
-  02 : none
-  03 : none
+  02 : step motor direction
+  03 : step motor step
   04 : sd
   05 : p1
   06 : p2
@@ -42,8 +43,9 @@ EthernetServer server(80);
 
 
 void setupEthernet() {
+  info("Setting up Ethernet ...");
   // Start the Ethernet connection and the server
-  if (Ethernet.begin(mac) == 0) {
+  if (Ethernet.begin(mac, 1000, 1000) == 0) {
     info("Failed to configure Ethernet using DHCP");
     // no point in carrying on, so do nothing forevermore:
     // try to configure using IP address instead of DHCP:
@@ -79,11 +81,12 @@ void setup(void) {
   Serial.begin(serialBaud);
   info("Setup ...");  
 
+  setupStepper();
   setupPompes();
   setupEthernet(); 
 
   // Start watchdog
-  wdt_enable(WDTO_4S);
+  wdt_enable(WDTO_8S);
   info("Setup done");
 }
 
@@ -93,6 +96,9 @@ void loop() {
   handleRoot(client);  
   // check if some timeout has been reached
   pmChecking();
+
+  // perform one step of the stepper motor if needed
+  performOneStep();
 
   // watchdog reset
   wdt_reset();

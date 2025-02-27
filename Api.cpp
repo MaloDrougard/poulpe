@@ -1,6 +1,7 @@
 #include "Api.h"
 #include "Log.h"
 #include "Pompe.h"
+#include "Stepper.h"
 
 using namespace mylog;
 
@@ -27,7 +28,7 @@ void failResponse(EthernetClient& client, const char* message = "Bad Request")
 }
 
 
-void handleRoot(EthernetClient& client) {
+void    handleRoot(EthernetClient& client) {
     if (client) {
         String request = client.readStringUntil('\r');
         info(request);
@@ -54,7 +55,17 @@ void handleRoot(EthernetClient& client) {
              } else {
                 failResponse(client, "Error parsing parameters");
             }
-        } else {
+        } else if (request.indexOf("GET /rotation") >= 0) {
+            int rIndex = request.indexOf("r=");
+            if (rIndex >= 0) {
+                double rValue = request.substring(rIndex + 2, request.indexOf(' ', rIndex)).toDouble();
+                rotation(rValue);
+                okResponse(client);
+            }
+            else {
+                failResponse(client, "Error parsing parameters");
+            }
+        }else {
            failResponse(client, "Unknown request");
         }
         client.stop();
