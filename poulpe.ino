@@ -33,44 +33,6 @@ DIGITAL:
 
 unsigned long int serialBaud = 115200;
 
-// Enter a MAC address for your controller below.
-byte mac[] = { 0x90, 0xA1, 0xDA, 0x0E, 0xFE, 0x40 };
-// IP address in case DHCP fails
-IPAddress ip(192, 168, 1, 13);
-// Ethernet server
-EthernetServer server(80);
-
-
-
-void setupEthernet() {
-  info("Setting up Ethernet ...");
-  // Start the Ethernet connection and the server
-  if (Ethernet.begin(mac, 1000, 1000) == 0) {
-    info("Failed to configure Ethernet using DHCP");
-    // no point in carrying on, so do nothing forevermore:
-    // try to configure using IP address instead of DHCP:
-    char ipStr[16];
-    snprintf(ipStr, sizeof(ipStr), "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-    info(ipStr);
-    Ethernet.begin(mac, ip);
-  }
-
-  // Check for Ethernet hardware present
-  if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-    info("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
-    while (true) {
-      delay(1); // do nothing, no point running without Ethernet hardware
-    }
-  }
-  if (Ethernet.linkStatus() == LinkOFF) {
-    info("Ethernet cable is not connected.");
-  }
-
-  delay(1000); 
-  server.begin();
-  Serial.print("server is at ");
-  Serial.println(Ethernet.localIP());
-}
 
 
 
@@ -79,23 +41,36 @@ void setup(void) {
   
   // Start Serial
   Serial.begin(serialBaud);
-  info("Setup ...");  
+  info("Setup ...");
 
   setupStepper();
   setupPompes();
-  setupEthernet(); 
 
   // Start watchdog
   wdt_enable(WDTO_8S);
   info("Setup done");
 }
 
+void readSerial() {
+  if (Serial.available()) {
+    String command = Serial.readStringUntil('\n');
+    command.trim();
+    info("Serial command recieved: " + command);
+    if (command.startsWith("rotation")) 
+    {
+      rotation(10.0);
+    }
+  }
+}
+
 
 void loop() {
-  EthernetClient client = server.available();
-  handleRoot(client);  
+
+  // read serial command
+  readSerial();
+
   // check if some timeout has been reached
-  pmChecking();
+  //pmChecking();
 
   // perform one step of the stepper motor if needed
   performOneStep();
