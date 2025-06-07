@@ -31,10 +31,11 @@ void Pompe::checkTiming() {
 }
 
 void Pompe::print() {
-    Serial.print("Pompe on pin ");
-    Serial.print(pin);
-    Serial.print(" is ");
-    Serial.println(state == HIGH ? "ON" : "OFF");
+    String message = "{ \"pin\": " + String(pin) \
+                      + ", \"state\":" + (state == HIGH ? "ON" : "OFF") \
+                      + ", \"duration\":" +  String(duration/1000) \
+                      +  ", \"remaining\": " + (state == HIGH ? String((duration - (millis() - startTime))/1000) : "0") + "}" ;
+    mylog::print(message);
 }
 
 
@@ -55,7 +56,7 @@ void pmChecking() {
   }
   
   
-  int pmPrint(String dummy) {
+  int pmInfo() {
     for (int i = 0; i < pmSize; i++) {
       pm[i].print();
     }

@@ -12,7 +12,9 @@ $ sudo python3 py-keyboard-hmi/main.py
 Connect to rasberry via Wireless:
 
 $ nmap 192.168.206.0-255
-$ ssh pi@192.168.206.212
+$ ssh pi@192.168.206.212 
+
+seems that 192.168.x.212 is taken by rasberry py on maken-net
 
 
 Connect to raberry via Ethernet (no DHCP server)
