@@ -68,6 +68,11 @@ void handleCommand(const String &command)
             failResponse("Error parsing parameters");
         }
     }
+    else if (command.indexOf("/info") >= 0)
+    {
+        pmInfo();
+        okResponse();
+    }   
     else
     {
         failResponse("Unknown command");

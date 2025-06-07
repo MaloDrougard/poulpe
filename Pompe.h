@@ -25,6 +25,6 @@ extern Pompe pm[];
 
 void setupPompes();
 void pmChecking();
-int pmPrint(String dummy);
+int pmInfo();
 
 #endif // POMPE_H

@@ -2,13 +2,16 @@ import keyboard
 from myglobal import logger
 from arduinocomm import send_cmd
 
+simplecmd = {
+    'i': '/info'
+}
+
 keycmd = {
     'a': '/setpompe?p=0&t={param}',
     's': '/setpompe?p=1&t={param}',
     'd': '/setpompe?p=2&t={param}',
     'f': '/setpompe?p=3&t={param}',
 }
-
 
 keyparam = {
     '0': '1',
@@ -21,11 +24,14 @@ keyparam = {
     '7': '128',
     '8': '256',
     '9': '512',
-}    
+}
+
+minimal_time = 0.25    
 
 
-def hotkey_callback_generator(command, param, dummy):
-    command = command.replace("{param}", str(param))    
+def hotkey_callback_generator(command, param = None, dummy = False):
+    if param:
+        command = command.replace("{param}", str(param))    
     def new_callback():
         logger.debug(f"trigger command: {command}")
         if not dummy: 
@@ -40,12 +46,14 @@ def setup(dummy = False):
     if dummy == True -> do not send it to arduino, only log
     """
     for key, command in keycmd.items():
-        # when key is press alone
-        keyboard.add_hotkey(key, hotkey_callback_generator(command, '0.1', dummy))
+        keyboard.add_hotkey(key, hotkey_callback_generator(command, minimal_time, dummy))
         
         # combination key + param
         for secondkey, param in keyparam.items():
             keyboard.add_hotkey(f"{key}+{secondkey}", hotkey_callback_generator(command, param, dummy))
+   
+    for key, command in simplecmd.items():
+        keyboard.add_hotkey(key, hotkey_callback_generator(command))
    
 
 if __name__ == "__main__":
