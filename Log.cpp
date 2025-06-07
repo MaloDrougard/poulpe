@@ -33,6 +33,11 @@ namespace mylog
         Serial.print("error: ");
         Serial.println(msg);
     }
+
+    void print(const String& msg) {
+        Serial.println(msg);
+    }
+    
 } // namespace mylog
 
 

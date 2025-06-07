@@ -5,7 +5,7 @@ using namespace mylog;
 
 
 void setupStepper() {
-    info("Stepper setup");
+    info("Setup stepper");
     // Set the two pins as Outputs
     pinMode(stepPin, OUTPUT);
     pinMode(dirPin, OUTPUT);
