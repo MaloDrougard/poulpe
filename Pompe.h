@@ -8,7 +8,7 @@ public:
     Pompe();
     void mysetup(int pin);
     // duration in second
-    void setStateFor(int state, unsigned long duration);
+    void setStateFor(int state, float duration);
     void checkTiming();
     void print();
 
@@ -26,6 +26,5 @@ extern Pompe pm[];
 void setupPompes();
 void pmChecking();
 int pmPrint(String dummy);
-int setPompe(String command);
 
 #endif // POMPE_H

@@ -27,7 +27,7 @@ keyparam = {
 def hotkey_callback_generator(command, param, dummy):
     command = command.replace("{param}", str(param))    
     def new_callback():
-        logger.info(f"trigger command: {command}")
+        logger.debug(f"trigger command: {command}")
         if not dummy: 
             send_cmd(command)
     

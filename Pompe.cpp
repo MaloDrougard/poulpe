@@ -3,7 +3,7 @@
 
 using namespace mylog;
 
-const int pmSize = 4;
+const int pmSize = 5;
 Pompe pm[pmSize];
 
 
@@ -15,9 +15,9 @@ void Pompe::mysetup(int pin) {
     digitalWrite(pin, LOW);
 }
 
-void Pompe::setStateFor(int state, unsigned long duration) {
+void Pompe::setStateFor(int state, float duration) {
     this->state = state;
-    this->duration = duration * 1000;
+    this->duration = duration * 1000.0; // convert form second (float) to millis (long)
     info("Setting pump " + String(pin) + " HIGH for duration " + String(duration) + "s");
     this->startTime = millis();
     digitalWrite(pin, state);
@@ -40,6 +40,7 @@ void Pompe::print() {
 
 
 void setupPompes() {
+   info("Setup pompes ...");
     pm[0].mysetup(5);
     pm[1].mysetup(6);
     pm[2].mysetup(7);
@@ -61,36 +62,3 @@ void pmChecking() {
     return 0;
   }
   
-  
-  int setPompe(String command) {
-    trace(__func__, command.c_str());
-  
-    char buffer[100];
-    snprintf(buffer, sizeof(buffer), "Set pompe with arg: %s", command.c_str());
-    info(buffer);
-  
-    int splitPos = command.indexOf("-");
-    if (splitPos < 0) {
-      snprintf(buffer, sizeof(buffer), "invalid parameter: %s", command.c_str());
-      error(buffer);
-      return -1;
-    }
-  
-    String strPompeIdx = command.substring(0, splitPos);
-    int pompeIdx = strPompeIdx.toInt();
-    String strTime = command.substring(splitPos + 1, command.length());
-    unsigned long time = (unsigned long)strTime.toInt();  // Convert String to unsigned int
-  
-    if (pompeIdx >= pmSize) {
-      snprintf(buffer, sizeof(buffer), "out of bound index: %d", pompeIdx);
-      error(buffer);
-      return -2;
-    }
-  
-    snprintf(buffer, sizeof(buffer), "set pompe: %d", pompeIdx);
-    info(buffer);
-  
-    pm[pompeIdx].setStateFor(HIGH, time);
-  
-    return 0;
-  }

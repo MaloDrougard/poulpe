@@ -2,11 +2,10 @@
 #define API_H
 
 #include <Arduino.h>
-#include <Ethernet.h>
 
-void handleRoot(EthernetClient& client);
+void handleCommand(const String& command);
 
-void okResponse(EthernetClient& client);
-void failResponse(EthernetClient& client);
+void okResponse();
+void failResponse();
 
 #endif // API_H
