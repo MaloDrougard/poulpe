@@ -48,10 +48,10 @@ def hotkey_callback_generator(key, command, param = None, dummy = False):
     if param:
         command = command.replace("{param}", str(param))    
     def new_callback():
-        records_cmds(key)
         logger.info(f"trigger command: {command}")
         if not dummy: 
             send_cmd(command)
+        records_cmds(key) # should be keep after
     
     return new_callback # return the function
 
