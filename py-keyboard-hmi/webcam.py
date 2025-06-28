@@ -1,6 +1,6 @@
 import cv2
 
-def capture2fullscreen(deviceid = 0): 
+def capture2fullscreen(deviceid = 4): 
         
     # Open the webcam (0 is usually the default webcam)
     cap = cv2.VideoCapture(deviceid)

@@ -1,7 +1,7 @@
 import logging
 
 # Configuration for webcam
-deviceid = 4
+deviceid = 0
 
 
 
