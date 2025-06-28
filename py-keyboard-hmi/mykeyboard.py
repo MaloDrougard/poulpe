@@ -7,19 +7,24 @@ simplecmd = {
 }
 
 keycmd = {
-    '8': '/setpompe?p=0&t={param}',
-    '6': '/setpompe?p=1&t={param}',
-    '2': '/setpompe?p=2&t={param}',
-    '4': '/setpompe?p=3&t={param}',
+    'a': '/setpompe?p=0&t={param}',
+    's': '/setpompe?p=1&t={param}',
+    'd': '/setpompe?p=2&t={param}',
+    'f': '/setpompe?p=3&t={param}',
 }
 
 keyparam = {
-    '5':'16',
-    '7':'4',
-    '9':'32',
-    '1':'128',
-    '3':'256'
-  }
+    '0': '1',
+    '1': '2',
+    '2': '4',
+    '3': '8',
+    '4': '16',
+    '5': '32',
+    '6': '64',
+    '7': '128',
+    '8': '256',
+    '9': '512',
+}
 
 minimal_time = 0.25    
 
@@ -28,12 +33,12 @@ last_cmds = []
 
 def records_cmds(cmd):
     global last_cmds 
-    if len(last_cmds) >= 3:
+    if len(last_cmds) >= 5:
         last_cmds.pop(0)
           
     last_cmds.append(str(cmd))
-    if last_cmds == ['6','6','6']:
-        logger.warning("666")
+    if last_cmds == ['h','a','d','e','s']:
+        logger.warning("hades")
         last_cmds = []
         send_cmd('/setpompe?p=0&t=16')
         send_cmd('/setpompe?p=1&t=16')
