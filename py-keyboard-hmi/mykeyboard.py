@@ -35,6 +35,11 @@ def records_cmds(cmd):
     if last_cmds == ['6','6','6']:
         logger.warning("666")
         last_cmds = []
+        send_cmd('/setpompe?p=0&t=16')
+        send_cmd('/setpompe?p=1&t=16')
+        send_cmd('/setpompe?p=2&t=16')
+        send_cmd('/setpompe?p=3&t=16')
+        
     
     logger.info(last_cmds)    
     
