@@ -5,6 +5,7 @@ from arduinocomm import send_cmd
 import json
 import sched
 import time
+from pathlib import Path
 
 max_duration = 60 * 5
 
@@ -25,25 +26,32 @@ def callback_generator(command):
     
     return new_callback
 
+
+
 class Partition:
-    def __init__(self, d):
+    def __init__(self, filepath):
+        self.filepath = filepath
         self.instrument = None
         self.timecodes = None
         self.cmdmap = None
-        self.scheduler = None
-        self.__dict__ = d
-        # check if the needed member are there:
-        if self.instrument is None:
-            logger.warning(f"instrument should be present in partition!")
-        if self.timecodes == None:
-            logger.warning(f"timecode should be present in partion!")
-    
+        self.read_json(self.filepath)
         self.prepare_cmdmap()
-        self.prepare_scheduler()
 
     
     def __str__(self):
         return json.dumps(self.__dict__, indent=4)
+
+    def read_json(self, filepath: Path):
+        try:
+            with open(self.filepath, 'r') as file:
+                data = json.load(file)
+                self.instrument = data['instrument']   
+                self.timecodes = data['timecodes']
+    
+        except Exception as e:
+            logger.error(f"Error reading JSON file: {e}")
+            return None
+
     
     # effect -> arduino command
     def prepare_cmdmap(self):
@@ -52,29 +60,38 @@ class Partition:
             self.cmdmap[effect] = cmd.replace("{param}", str(self.instrument))  
     
     # schedul a effect for a given time    
-    def prepare_scheduler(self):
+    def add_to_scheduler(self, scheduler):
         # Create a scheduler instance
-        self.scheduler = sched.scheduler(time.time, time.sleep)
         for timecode, effect in self.timecodes.items():
             logger.info(f"add scheduler: pompe: {self.instrument}, time:{timecode}, effect:{effect}")
-            self.scheduler.enter(float(timecode),1, callback_generator(self.cmdmap[effect]))            
+            scheduler.enter(float(timecode),1, callback_generator(self.cmdmap[effect]))            
 
 
+
+class Choral:
+    
+    def __init__(self, directory):
+        self.directory = directory
+        self.partitions = []
+        
+        self.parse_dir(directory)
+        self.scheduler = sched.scheduler(time.time, time.sleep)
+        self.prepare_scheduler()
+        
+    def parse_dir(self, directory):
+        for filepath in Path(directory).glob("*.json"):
+            logger.info(f"Parsing partition file: {filepath}")
+            partition = Partition(filepath)
+            self.partitions.append(partition)
+    
+    def prepare_scheduler(self):
+        for p in self.partitions:
+            p.add_to_scheduler(self.scheduler)
+        
     def play(self):
         self.scheduler.run()
 
-
-def read_json_to_partition(file_path):
-    try:
-        with open(file_path, 'r') as file:
-            data = json.load(file)
     
-    except Exception as e:
-        logger.error(f"Error reading JSON file: {e}")
-        return None
-    
-    return Partition(data)
- 
 
 
 
@@ -85,9 +102,9 @@ if __name__ == "__main__":
     arduinocomm.setup()
 
     dir = myglobal.partition_folder()
-    partition = read_json_to_partition(myglobal.partition_folder() / "pompe1.json")
     
-    partition.play()
+    choral = Choral(dir)
+    choral.play()
 
     arduinocomm.setdown()
     logger.info('Exiting ...')

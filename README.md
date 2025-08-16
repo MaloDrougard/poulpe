@@ -23,3 +23,12 @@ So, if you connect the rasberry to your local computer, you may use:
 (make sure your local computer also use link-local)
 
 ssh pi@169.254.241.43
+
+
+#Mapping des pompes:
+
+
+0: vidange:
+1: décanteur bas
+2: décanteur liège
+3: bac (remous)
