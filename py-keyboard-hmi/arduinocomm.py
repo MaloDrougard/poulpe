@@ -5,10 +5,7 @@ import myglobal
 from myglobal import logger
 
 
-# Configure the serial connection
-arduino_port = '/dev/ttyACM0'  # Replace with your Arduino's port
-if myglobal.arduino_port:
-    arduino_port = myglobal.arduino_port
+arduino_port = myglobal.arduino_port()
 
 baud_rate = 115200  # Match the baud rate set in your Arduino sketch
 
