@@ -1,0 +1,7 @@
+{
+    "instrument" : "3",
+    "timecodes": {
+        "1": "ON",
+        "10": "OFF"
+    }
+}           

@@ -1,0 +1,10 @@
+{
+    "instrument" : "0",
+    "description": "Drain pump",
+    "timecodes": {
+        "90": "ON",
+        "120": "OFF",
+        "130": "ON",
+        "160": "OFF"
+    }
+}           

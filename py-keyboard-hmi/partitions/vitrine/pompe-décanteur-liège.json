@@ -1,0 +1,12 @@
+{
+    "instrument" : "2",
+    "description": "Decanter top pump",
+    "timecodes": {
+        "15": "ON",
+        "25": "OFF",
+        "40": "ON",
+        "45": "OFF",
+        "50": "ON",
+        "60": "OFF"
+    }
+}           

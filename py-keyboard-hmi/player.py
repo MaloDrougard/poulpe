@@ -101,6 +101,8 @@ if __name__ == "__main__":
     # setup the arduino serial connection -> needed to communicate with arduino
     arduinocomm.setup()
 
+    time.sleep(1)  # wait for the serial connection to be established
+    
     dir = myglobal.partition_folder()
     
     choral = Choral(dir)

@@ -7,10 +7,10 @@ simplecmd = {
 }
 
 keycmd = {
-    'a': '/setpompe?p=0&t={param}',
-    's': '/setpompe?p=1&t={param}',
-    'd': '/setpompe?p=2&t={param}',
-    'f': '/setpompe?p=3&t={param}',
+    '2': '/setpompe?p=0&t={param}',
+    '6': '/setpompe?p=1&t={param}',
+    '9': '/setpompe?p=2&t={param}',
+    '1': '/setpompe?p=3&t={param}',
 }
 
 keyparam = {

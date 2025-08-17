@@ -18,7 +18,7 @@ def arduino_port():
 
 
 def partition_folder(): 
-    return Path(__file__).resolve().parent / "partitions"
+    return Path(__file__).resolve().parent / "partitions" / "vitrine"
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
