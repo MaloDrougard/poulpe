@@ -53,5 +53,22 @@ def capture2fullscreen(deviceid = 4):
     cv2.destroyAllWindows()
 
 
+def list_webcam():
+    # List available webcams
+    print("Iterate on /dev/video until 6:")
+    for index in range(6):
+        cap = cv2.VideoCapture(index)
+        if cap.read()[0]:
+           print(f"Webcam {index} is available.")           
+           print(f"Resolution: {int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))}x{int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))}, FPS: {int(cap.get(cv2.CAP_PROP_FPS))}")
+        else:
+           print(f"Webcam {index} is NOT available.") 
+        cap.release()
+        index += 1
+    
+
+
 if __name__ == "__main__":
+    list_webcam()
+    print("start fullscree, escape with Q")
     capture2fullscreen()
