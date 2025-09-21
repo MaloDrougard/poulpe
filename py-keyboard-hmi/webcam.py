@@ -14,8 +14,8 @@ def capture2fullscreen(deviceid = 4):
     cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
 
     # Set resolution and FPS
-    desired_width =  1920 #1280 # Set your desired width
-    desired_height = 1080 #720   # Set your desired height
+    desired_width = 6000 # 1920 #1280 # Set your desired width
+    desired_height = 4000 #1080 #720   # Set your desired height
     desired_fps = 30      # Set your desired FPS
 
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, desired_width)
@@ -27,7 +27,7 @@ def capture2fullscreen(deviceid = 4):
     actual_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     actual_fps = int(cap.get(cv2.CAP_PROP_FPS))
 
-    print(f"Camera resolution: {actual_width}x{actual_height}")
+    print(f"Camera resolution: {actual_width}x{actual_height}, desired resolution: {desired_width} x {desired_height}")
     print(f"Camera FPS: {actual_fps}")
 
     # Set fullscreen window
