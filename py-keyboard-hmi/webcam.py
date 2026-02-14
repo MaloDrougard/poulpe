@@ -14,8 +14,8 @@ def capture2fullscreen(deviceid = 4):
     cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
 
     # Set resolution and FPS
-    desired_width = 6000 # 1920 #1280 # Set your desired width
-    desired_height = 4000 #1080 #720   # Set your desired height
+    desired_width =  1920 #1280 # Set your desired width
+    desired_height = 1080 #720   # Set your desired height
     desired_fps = 30      # Set your desired FPS
 
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, desired_width)
@@ -71,4 +71,4 @@ def list_webcam():
 if __name__ == "__main__":
     list_webcam()
     print("start fullscree, escape with Q")
-    capture2fullscreen()
+    capture2fullscreen(5)
