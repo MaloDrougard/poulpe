@@ -1,9 +1,7 @@
-Install on raspberry
-####################
+dernière ajout:
+- picam.py pour l'utilisation des cam ISC rasberry
 
+prochaines étapes:
+- création des filtres
+- connection du clavier midi
 
-python3 -m venv venv
-source venv/bin/activate
-venv/bin/pip install -r requirments.txt
-
-sudo venv/bin/python main.py
