@@ -24,8 +24,7 @@ class Capture2Fullscreen():
             capture.run()
         
         The rest interface can be access as:
-        curl -X POST -H "Content-Type: application/json" -d '{"enabled": true}' http://localhost:5000/api/filter1
-{"filter1":true,"status":"success"}
+        curl -X POST -H "Content-Type: application/json" -d '{"enabled": true}' http://localhost:5000/api/filter1 {"filter1":true,"status":"success"}
 
     """
     
@@ -45,6 +44,7 @@ class Capture2Fullscreen():
         # Wait for the camera thread to finish (web server runs as a daemon)
         camera_thread.join()
 
+
     def start_web_api(self):
         app = Flask(__name__)
 
@@ -53,12 +53,17 @@ class Capture2Fullscreen():
             logger.info(request.json)
             filter1_enable = request.json.get('enabled', False)
             # Send the updated filter1 status to the queue
-            logger.info("set filter1_enable {filter1_enable} in queue")
-            
+            logger.info("set filter1_enable {filter1_enable} in queue") 
             self.data_queue.put({'filter1': filter1_enable})
             
             return jsonify({'status': 'success', 'filter1':filter1_enable})
 
+        @app.route('/api/exit', methods=['POST'])
+        def exit_app():
+            logger.info("Exit request received")
+            self.data_queue.put({'exit': True})
+            return jsonify({'status': 'success', 'exit_requested': True})
+            
         @app.route('/api/status', methods=['GET'])
         def get_status():
             return jsonify({'filter1': self.filter1})
@@ -70,14 +75,14 @@ class Capture2Fullscreen():
         """
         """
         
-        picam = setupcapture()
+        picam = self._setupcapture()
         picam.start()
         
         cv2.namedWindow("Picamera2 Preview", cv2.WINDOW_NORMAL)
         cv2.setWindowProperty("Picamera2 Preview", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         
         f1 = False
-
+        exit_requested = False
         while True:
             frame = picam.capture_array()
 
@@ -87,10 +92,14 @@ class Capture2Fullscreen():
                 logger.info(f"data in queue {data}")
                 if 'filter1' in data:
                     f1 = data['filter1']  # Update filter1 status
-
+                if 'exit'in data:
+                    exit_requested = data['exit']
+                    
             if f1:
                 frame = self.filter1(frame)
-
+            if exit_requested:
+                break
+            
             cv2.imshow("Picamera2 Preview", frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
