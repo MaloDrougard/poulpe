@@ -1,4 +1,5 @@
 import logging
+from logging.handlers import SysLogHandler
 import platform
 import os
 from pathlib import Path
@@ -23,4 +24,7 @@ def partition_folder():
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-logger = logging.getLogger("tentacule")
+logger = logging.getLogger("poulpe")
+syslog_handler = SysLogHandler(address = '/dev/log')
+syslog_handler.setFormatter(logging.Formatter('%(name)s - %(levelname)s - %(message)s'))
+logger.addHandler(syslog_handler)
