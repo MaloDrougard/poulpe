@@ -11,7 +11,8 @@ logger.info("start")
 # setup the arduino serial connection
 arduinocomm.setup()
 
-# start read from serial in a separate thread 
+# start READ from serial in a separate thread 
+# write is done directly by the other process
 logger.info("start arduino communication")
 serial_thread = threading.Thread(target=arduinocomm.read_from_serial, daemon=True)
 serial_thread.start()

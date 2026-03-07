@@ -32,3 +32,8 @@ ssh pi@169.254.241.43
 1: décanteur bas
 2: décanteur liège
 3: bac (remous)
+
+
+# Module rasberry camera
+
+$ rpicam-hello --list-camera
