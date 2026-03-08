@@ -13,7 +13,7 @@ from flask import Flask, request, jsonify
 import numpy as np  # Ensure NumPy is imported
 
 
-class Transform():
+class Capture2Fullscreen():
     
     def __init__(self, messages: queue = None):
         
@@ -26,7 +26,7 @@ class Transform():
         self.messages = messages
 
     
-    def start_display_capture(self):
+    def start(self):
         
         picam = self._setupcapture()
         picam.start()
@@ -130,17 +130,28 @@ class Transform():
         hsv = hsv.astype('uint8')
         return hsv
     
+    def filter_invert_luminance(self, frame):
+        """
+        Invert the luminance (value channel) of the frame.
+        
+        Args:
+            frame: Input frame in HSV format
+        """
+        hsv = frame.astype(float)
+        hsv[:, :, 2] = 255 - hsv[:, :, 2]
+        return hsv.astype('uint8')
+    
     
 
 
-class Capture2Fullscreen():
+class Capture2FullscreenWithRestApi():
     """
     Capture the a raspberry camera input, transform it and display it fullscreen.
-    The control of the transformation is done via a web REST interface. 
-    Thus two threads are started once for the web interface and one for the capture and display. 
+    The control of this transformation is done via a web REST interface. 
+    Thus two threads are started onc for the web interface and one for the capture and display. 
      
         Usage: 
-            capture = Capture2Fullscreen()
+            capture = Capture2FullscreenWithRestApi()
             capture.run()
         
         The rest interface can be access as:
@@ -150,13 +161,13 @@ class Capture2Fullscreen():
     
     def __init__(self):
         self.data_queue = queue.Queue()  # Shared queue for communication
-        self.transform = Transform(self.data_queue)
+        self.transform = Capture2Fullscreen(self.data_queue)
         
 
     def run(self):
         # Create threads for the web server and the camera preview
         web_api_thread = threading.Thread(target=self.start_web_api, daemon=True)
-        camera_thread = threading.Thread(target=self.transform.start_display_capture)
+        camera_thread = threading.Thread(target=self.transform.start)
 
         # Start the threads
         web_api_thread.start()
@@ -178,6 +189,7 @@ class Capture2Fullscreen():
         @app.route('/exit', methods=['POST'])
         def exit_app():
             logger.info("Exit request received")
+            
             self.data_queue.put({'exit': True})
             return jsonify({'status': 'success', 'exit_requested': True})
             
@@ -201,5 +213,5 @@ def getScreenWidthAndHeight():
 
 
 if __name__ == "__main__":
-    capture = Capture2Fullscreen()
+    capture = Capture2FullscreenWithRestApi()
     capture.run()

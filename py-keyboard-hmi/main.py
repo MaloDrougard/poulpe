@@ -28,12 +28,12 @@ logger.info("start")
 
 # listen to midi inputs and call the apropriate apis 
 logger.info("start listen to midi inputs")
-serial_thread = threading.Thread(target=midi.listen_midis, daemon=True)
-serial_thread.start()
+midi_thread = threading.Thread(target=midi.listen_midis, daemon=True)
+midi_thread.start()
 
 # capture the webcam and display on the sceen.
-capture2fullscreen = picam.Capture2Fullscreen()
-capture2fullscreen.run()
+cam2monitor_thread = picam.Capture2FullscreenWithRestApi()
+cam2monitor_thread.run()
 
 # # setup the keybinding 
 # logger.info("start keyboard capture")
