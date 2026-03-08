@@ -28,3 +28,7 @@ logger = logging.getLogger("poulpe")
 syslog_handler = SysLogHandler(address = '/dev/log')
 syslog_handler.setFormatter(logging.Formatter('%(name)s - %(levelname)s - %(message)s'))
 logger.addHandler(syslog_handler)
+
+
+def display_api(): 
+    return "http://localhost:5000"

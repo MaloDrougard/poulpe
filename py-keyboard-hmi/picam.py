@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from picamera2 import Picamera2
 
-from myglobal import logger
+from myglobal import logger, display_api
 
 import time
 import sys
@@ -10,6 +10,7 @@ import subprocess
 import threading
 import queue
 from flask import Flask, request, jsonify
+import numpy as np  # Ensure NumPy is imported
 
 
 
@@ -34,8 +35,8 @@ class Capture2Fullscreen():
 
     def run(self):
         # Create threads for the web server and the camera preview
-        web_api_thread = threading.Thread(target=capture.start_web_api, daemon=True)
-        camera_thread = threading.Thread(target=capture.start_display_capture)
+        web_api_thread = threading.Thread(target=self.start_web_api, daemon=True)
+        camera_thread = threading.Thread(target=self.start_display_capture)
 
         # Start the threads
         web_api_thread.start()
@@ -48,27 +49,26 @@ class Capture2Fullscreen():
     def start_web_api(self):
         app = Flask(__name__)
 
-        @app.route('/api/filter1', methods=['POST'])
-        def toggle_filter1():
-            logger.info(request.json)
-            filter1_enable = request.json.get('enabled', False)
-            # Send the updated filter1 status to the queue
-            logger.info("set filter1_enable {filter1_enable} in queue") 
-            self.data_queue.put({'filter1': filter1_enable})
-            
-            return jsonify({'status': 'success', 'filter1':filter1_enable})
+        @app.route('/filter', methods=['POST'])
+        def set_filter():
+            logger.info(f"displayer-recieve: {request.json}")
+            self.data_queue.put(request.json)
+            return jsonify({'status': 'success'})
 
-        @app.route('/api/exit', methods=['POST'])
+        @app.route('/exit', methods=['POST'])
         def exit_app():
             logger.info("Exit request received")
             self.data_queue.put({'exit': True})
             return jsonify({'status': 'success', 'exit_requested': True})
             
-        @app.route('/api/status', methods=['GET'])
+        @app.route('/status', methods=['GET'])
         def get_status():
             return jsonify({'filter1': self.filter1})
 
+
         app.run(host='0.0.0.0', port=5000, debug=False, threaded=True)
+
+
 
 
     def start_display_capture(self):
@@ -81,33 +81,50 @@ class Capture2Fullscreen():
         cv2.namedWindow("Picamera2 Preview", cv2.WINDOW_NORMAL)
         cv2.setWindowProperty("Picamera2 Preview", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         
-        f1 = False
-        exit_requested = False
-        while True:
-            frame = picam.capture_array()
 
+        brightness = 0
+        hue = 0
+        saturation = 1.0
+        exit_requested = False
+        
+        while True:
+            
+            # return rgb image 
+            rgb = picam.capture_array()
+
+            # Convert RGB to HSV
+            hsv = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)
+        
             # Check if there is new data in the queue
             while not self.data_queue.empty():
                 data = self.data_queue.get()
                 logger.info(f"data in queue {data}")
-                if 'filter1' in data:
-                    f1 = data['filter1']  # Update filter1 status
+                if 'filter' in data:
+                    if data['filter'] == 1:
+                        brightness = int((data.get('value', 63) - 63) * 200 / 128)
+                    elif data['filter'] == 2:
+                        hue = int((data.get('value', 63) - 63) * 180 / 128)
+                    elif data['filter'] == 3:
+                        saturation = data.get('value', 63) / 64.0
+                        
                 if 'exit'in data:
                     exit_requested = data['exit']
                     
-            if f1:
-                frame = self.filter1(frame)
+            
+            hsv = self.filter_brightness_hue_saturation(hsv, brightness, hue, saturation)
+           
             if exit_requested:
                 break
             
-            cv2.imshow("Picamera2 Preview", frame)
+            bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+            cv2.imshow("Picamera2 Preview", bgr)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
         picam.stop()
         cv2.destroyAllWindows()
-        
+    
 
     def _setupcapture(self):
         width, height = getScreenWidthAndHeight()
@@ -123,6 +140,36 @@ class Capture2Fullscreen():
     def filter1(self, frame):
         bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         return bgr
+    
+    
+    
+    def filter_brightness_hue_saturation(self, frame, brightness=0, hue=0, saturation=1.0):
+        """
+        Apply brightness, hue, and saturation adjustments to frame.
+        
+        Args:
+            frame: Input frame in BGR format
+            brightness: Brightness adjustment (-100 to 100)
+            hue: Hue shift (0 to 180)
+            saturation: Saturation multiplier (0.0 to 2.0)
+        """
+        
+        logger.debug(f"brightness={brightness}, hue={hue}, saturation={saturation}")
+        
+        hsv = frame.astype(float)
+        
+        # Adjust hue
+        hsv[:, :, 0] = (hsv[:, :, 0] + hue) % 180
+        
+        # Adjust saturation
+        hsv[:, :, 1] = np.clip(hsv[:, :, 1] * saturation, 0, 255)
+        
+        # Adjust brightness (value channel)
+        hsv[:, :, 2] = np.clip(hsv[:, :, 2] + brightness, 0, 255)
+        
+        # Convert back to BGR
+        hsv = hsv.astype('uint8')
+        return hsv
 
 
         
@@ -145,4 +192,3 @@ def getScreenWidthAndHeight():
 if __name__ == "__main__":
     capture = Capture2Fullscreen()
     capture.run()
-   
