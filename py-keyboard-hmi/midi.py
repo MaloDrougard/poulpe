@@ -21,7 +21,7 @@ def control_change(msg):
     try:
         match msg.control:
          
-            case 1 | 2 | 3:
+            case 1 | 2 | 3 | 4:
                 
                 json={"filter": msg.control, "value": msg.value}
                 url= display_api() + "/filter"
