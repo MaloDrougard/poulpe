@@ -17,23 +17,40 @@ class Capture2Fullscreen():
     
     def __init__(self, messages: queue = None):
         
-        self.brightness = 0
-        self.hue = 0
-        self.saturation = 1.0
-        self.contrast = 1.0
-
         # message queue to recieve info from other THREAD
         self.messages = messages
 
+        self.width = -1
+        self.height = -1
+
+        
+        self.enable_hsb_filter = False
+        self.hue = 0
+        self.saturation = 1.0
+        self.brightness = 0
+        
+        # RGB filter
+        self.enable_rgb_filter = False
+        self.red = 1.0
+        self.green = 1.0
+        self.blue = 1.0
+        
+        
+        # variable for the function update_and_log_fps
+        self.fps_counter = 0
+        self.fps_start_time = -1
+        self.fps_log_frequence = 4  # in second
     
+
     def start(self):
         
         picam = self._setupcapture()
         picam.start()
         
-        cv2.namedWindow("Picamera2 Preview", cv2.WINDOW_NORMAL)
-        cv2.setWindowProperty("Picamera2 Preview", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-        
+        window_name = "Poulpe"
+        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+        cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+       
         while True:
             
             # Parse message in qeue and set the properties of the filter/object
@@ -41,16 +58,23 @@ class Capture2Fullscreen():
             
             # return rgb image 
             rgb = picam.capture_array()
-            
             # Convert RGB to HSV
-            hsv = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)        
+            hsv = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)
             
-            hsv = self.filter_brightness_hue_saturation(hsv, self.brightness, self.hue, self.saturation)
-            hsv = self.filter_contrast(hsv, self.contrast)           
-           
+            
+            if self.enable_hsb_filter: # self.enable_hsb_filter:    
+                hsv = self.filter_brightness_hue_saturation(hsv, self.brightness, self.hue, self.saturation)
+                   
             # Convert HSV to BGR before displaying
             bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
-            cv2.imshow("Picamera2 Preview", bgr)
+
+            if self.enable_rgb_filter:
+                bgr = self.filter_rgb(bgr, self.red, self.green, self.blue)
+            
+            cv2.imshow(window_name, bgr)
+            
+            # Calculate and display FPS
+            self.update_and_log_fps()
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -59,48 +83,94 @@ class Capture2Fullscreen():
         cv2.destroyAllWindows()
     
 
-        
+    def update_and_log_fps(self):
+        """Update FPS counters and log once per second."""
+        # initialise time if never set
+        if self.fps_start_time == -1:
+            self.fps_start_time = time.time()
+            
+        self.fps_counter += 1
+        elapsed_time = time.time() - self.fps_start_time
+        if elapsed_time >= self.fps_log_frequence:
+            fps = self.fps_counter / elapsed_time
+            logger.info(f"FPS: {fps:.2f}")
+            # reset the value
+            self.fps_start_time = time.time()
+            self.fps_counter = 0
+           
+     
     def parse_messages_queue(self):
+        """Process all messages in the queue and update filter settings."""
         if not self.messages:
             return 
         
         while not self.messages.empty():
-            data = self.messages.get()
-            logger.info(f"data in queue {data}")
-            if 'filter' in data:
-                if data['filter'] == 1:
-                    self.brightness = int((data.get('value', 63) - 63) * 200 / 128)
-                elif data['filter'] == 2:
-                    self.hue = int((data.get('value', 63) - 63) * 180 / 128)
-                elif data['filter'] == 3:
-                    self.saturation = data.get('value', 63) / 64.0
-                elif data['filter'] == 4:
-                    self.contrast = data.get('value', 63) / 64.0
-        
+            try:
+                data = self.messages.get()
+                logger.debug(f"data in queue {data}")
+                
+                action = data.get("action")
+                if not action:
+                    logger.warning(f"message without action received, msg: {data}")
+                    continue
+                
+                if action == "set_value":
+                    self._handle_set_value(data)
+                elif action == "toggle_filter_group":
+                    self._handle_toggle_filter(data)
+                else:
+                    logger.warning(f"unknown action: {action}")
+                    
+            except Exception as e:
+                logger.error(f"Error processing message from queue: {e}")
+
+    def _handle_set_value(self, data):
+        """Handle set_value action for filter parameters."""
+        filter_id = data.get('filter_id')
+        value = data.get('value', 63)
+
+        if filter_id == "brightness":
+            self.brightness = int((value - 63) * 200 / 128)
+        elif filter_id == "hue":
+            self.hue = int((value - 63) * 180 / 128)
+        elif filter_id == "saturation":
+            self.saturation = value / 64.0
+        elif filter_id == "red":
+            self.red = value / 64.0
+        elif filter_id == "green":
+            self.green = value / 64.0
+        elif filter_id == "blue":
+            self.blue = value / 64.0
+            
+    def _handle_toggle_filter(self, data):
+        """Handle toggle_filter_group action."""
+        filter_group_id = data.get("filter_group_id")
+        if filter_group_id == "hsb":
+            self.enable_hsb_filter = not self.enable_hsb_filter
+            logger.info(f"enable_hsb_filter set to: {self.enable_hsb_filter}")
+        elif filter_group_id == "rgb":
+            self.enable_rgb_filter = not self.enable_rgb_filter
+            logger.info(f"enable_rgb_filter set to: {self.enable_rgb_filter}")
 
     def _setupcapture(self):
+        
         width, height = getScreenWidthAndHeight()
+        
+        if self.width == -1:
+            self.width = width
+        if self.height == -1:
+            self.height = height
+            
+        logger.info(f"width, height set to {self.width}, {self.height}")
+        
         picam = Picamera2()
         config = picam.create_preview_configuration(
-            main={"size": (width, height)},
+            main={"size": (self.width, self.height)},
             controls={"FrameDurationLimits": (33333, 33333)}  # lock to ~30 FPS (microseconds)
         )
         picam.configure(config)
         return picam
 
-    
-    def filter_contrast(self, frame, contrast=1.0):
-        """
-        Apply contrast adjustment to frame.
-        
-        Args:
-            frame: Input frame in HSV format
-            contrast: Contrast multiplier (0.0 to 2.0)
-        """
-        hsv = frame.astype(float)
-        hsv[:, :, 2] = np.clip(hsv[:, :, 2] * contrast, 0, 255)
-        return hsv.astype('uint8')
-    
        
     def filter_brightness_hue_saturation(self, frame, brightness=0, hue=0, saturation=1.0):
         """
@@ -130,6 +200,7 @@ class Capture2Fullscreen():
         hsv = hsv.astype('uint8')
         return hsv
     
+    
     def filter_invert_luminance(self, frame):
         """
         Invert the luminance (value channel) of the frame.
@@ -141,7 +212,26 @@ class Capture2Fullscreen():
         hsv[:, :, 2] = 255 - hsv[:, :, 2]
         return hsv.astype('uint8')
     
-    
+    def filter_rgb(self, frame, red=1.0, green=1.0, blue=1.0):
+        """
+        Apply red, green, blue channel multipliers to a BGR frame.
+
+        Args:
+            frame: Input frame in BGR format
+            red:   Red channel multiplier   (0.0 to 2.0, 1.0 = no change)
+            green: Green channel multiplier (0.0 to 2.0, 1.0 = no change)
+            blue:  Blue channel multiplier  (0.0 to 2.0, 1.0 = no change)
+        """
+        logger.debug(f"rgb filter: red={red}, green={green}, blue={blue}")
+
+        bgr = frame.astype(float)
+
+        # BGR order: channel 0 = Blue, 1 = Green, 2 = Red
+        bgr[:, :, 0] = np.clip(bgr[:, :, 0] * blue,  0, 255)
+        bgr[:, :, 1] = np.clip(bgr[:, :, 1] * green, 0, 255)
+        bgr[:, :, 2] = np.clip(bgr[:, :, 2] * red,   0, 255)
+
+        return bgr.astype('uint8')
 
 
 class Capture2FullscreenWithRestApi():
