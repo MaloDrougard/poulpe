@@ -1,5 +1,5 @@
 import mido
-from myglobal import logger, display_api
+from myglobal import logger, display_api, arduino_api
 import requests
 
 
@@ -10,7 +10,7 @@ import requests
 # Map MIDI input to functions
 midi_handlers = {
     'note_on': lambda msg: note_on_change(msg),
-    'note_off': lambda msg: logger.info(f"Note Off: {msg.note}"),
+    'note_off': lambda msg: note_off_change(msg),
     'control_change': lambda msg: control_change(msg)
 }
 
@@ -30,22 +30,50 @@ map_note_on_to_filter_action = {
     127 : {"action": "toggle_filter_group", "filter_group_id": "rgb"},
 }
 
+map_note_on_to_arduino_action = {
+    48 : {"action": "set_pompe", "p": 0 , "t": 60},
+    50 : {"action": "set_pompe", "p": 1 , "t": 60},
+    52 : {"action": "set_pompe", "p": 2 , "t": 60},
+    53 : {"action": "set_pompe", "p": 3 , "t": 60}
+}
 
+map_note_off_to_arduino_action = {
+    48 : {"action": "set_pompe", "p": 0 , "t": 0},
+    50 : {"action": "set_pompe", "p": 1 , "t": 0},
+    52 : {"action": "set_pompe", "p": 2 , "t": 0},
+    53 : {"action": "set_pompe", "p": 3 , "t": 0}
+}
+
+
+def note_off_change(msg):
+    logger.debug(f"Note Off: {msg.note}")
+    
+    try:
+        action_arduino = map_note_off_to_arduino_action.get(msg.note)
+        if action_arduino:
+            url = arduino_api() + "/command"
+            logger.info(f"midi: send: {url}, json={action_arduino}")
+            requests.post(url, json=action_arduino)
+            
+    except Exception as e:
+        logger.error(f"Error sending note off message: {e}")
 
 
 def note_on_change(msg):
     logger.debug(f"Note On: {msg.note}")
 
     try:
-        action = map_note_on_to_filter_action.get(msg.note)
-        
-        if action:
+        action_filter = map_note_on_to_filter_action.get(msg.note)
+        if action_filter:
             url = display_api() + "/filter"
-        
-            logger.info(f"midi: send: {url}, json={action}")
-            requests.post(url, json=action)
-        else:
-            logger.warning(f"Unmapped note: {msg.note}")
+            logger.info(f"midi: send: {url}, json={action_filter}")
+            requests.post(url, json=action_filter)    
+       
+        action_arduino = map_note_on_to_arduino_action.get(msg.note)
+        if action_arduino:
+            url = arduino_api() + "/command"
+            logger.info(f"midi: send: {url}, json={action_arduino}")
+            requests.post(url, json=action_arduino)
             
     except Exception as e:
         logger.error(f"Error sending note on message: {e}")
@@ -69,8 +97,6 @@ def control_change(msg):
                 
     except Exception as e:
         logger.error(f"Error sending control message: {e}")
-
-
 
 
 

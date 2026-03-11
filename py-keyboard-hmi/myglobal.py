@@ -32,3 +32,7 @@ logger.addHandler(syslog_handler)
 
 def display_api(): 
     return "http://localhost:5000"
+
+
+def arduino_api(): 
+    return "http://localhost:5001"

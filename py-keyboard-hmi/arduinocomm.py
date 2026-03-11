@@ -39,6 +39,9 @@ def read_from_serial():
         
 
 def send_cmd(command: str):
+    if not ser:
+       logger.warning(f"serial not initlialize, cmd '{command}' not send") 
+       return 
     ser.write((command + '\n').encode('utf-8'))
     logger.info(f"Sent command: {command}")
     

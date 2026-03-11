@@ -5,6 +5,7 @@ import threading
 import webcam
 import picam 
 import midi
+import arduino_restapi
 
 #import keyboard
 #import mykeyboard
@@ -31,9 +32,22 @@ logger.info("start listen to midi inputs")
 midi_thread = threading.Thread(target=midi.listen_midis, daemon=True)
 midi_thread.start()
 
+# Run arduino REST API in a background thread
+logger.info(f"start Arduino REST API in background thread")
+arduino_api_thread = threading.Thread(
+        target=arduino_restapi.run_api,
+        args=("0.0.0.0", 5001),
+        daemon=True
+    )
+arduino_api_thread.start()
+    
+
 # capture the webcam and display on the sceen.
 cam2monitor_thread = picam.Capture2FullscreenWithRestApi()
 cam2monitor_thread.run()
+
+
+
 
 # # setup the keybinding 
 # logger.info("start keyboard capture")
