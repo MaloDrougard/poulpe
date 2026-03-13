@@ -1,3 +1,3 @@
-python3 main.py
 
 
+sudo systemctl start poulpe-*

@@ -32,7 +32,7 @@ def setdown():
 
 def read_from_serial():
     while True:
-        if ser.in_waiting > 0:
+        if ser and ser.in_waiting > 0:
             data = ser.readline().decode('utf-8').strip()
             logger.info(f"ARDUINO: {data}")
         time.sleep(sleep_read)
@@ -45,6 +45,7 @@ def send_cmd(command: str):
     ser.write((command + '\n').encode('utf-8'))
     logger.info(f"Sent command: {command}")
     time.sleep(sleep_write)
+
 
 if __name__ == "__main__":
     setup()

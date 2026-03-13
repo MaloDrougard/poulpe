@@ -6,42 +6,21 @@ prochaines étapes:
 - connection du clavier midi
 
 
-## systemd service webcam
 
-Le fichier `webcam.service` permet de lancer `webcam.py` au démarrage graphique.
+## systemd poulpe services
+
+Le fichier `poulpe-*.service` permet de lancer les applications `picam.py`, `arduino-api.py`, `midi.py` au démarrage.
 
 Installation:
 
 ```bash
-sudo cp /home/makem/Git/poulpe/py-keyboard-hmi/webcam.service /etc/systemd/system/
+sudo cp ./poulpe-*.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl start webcam.service
+sudo systemctl status poulpe-*.service
 ```
 
 Vérification:
 
 ```bash
-systemctl status webcam.service
-journalctl -u webcam.service -f
-```
-
-
-## systemd service picam
-
-Le fichier `picam.service` permet de lancer `picam.py` au démarrage graphique.
-
-Installation:
-
-```bash
-sudo cp ./py-keyboard-hmi/picam.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl start picam.service
-```
-
-Vérification:
-
-```bash
-systemctl status picam.service
-journalctl -u picam.service -f
-```
-
+systemctl status poulpe-*.service
+journalctl -u poulpe-*.service -f

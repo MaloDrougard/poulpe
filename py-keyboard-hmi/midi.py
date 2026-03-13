@@ -31,17 +31,17 @@ map_note_on_to_filter_action = {
 }
 
 map_note_on_to_arduino_action = {
-    48 : {"action": "set_pompe", "p": 0 , "t": 60},
-    50 : {"action": "set_pompe", "p": 1 , "t": 60},
-    52 : {"action": "set_pompe", "p": 2 , "t": 60},
-    53 : {"action": "set_pompe", "p": 3 , "t": 60}
+    48 : {"action": "set_pompe", "p": 0 , "t": 20},
+    # 50 : {"action": "set_pompe", "p": 1 , "t": 20},
+    # 52 : {"action": "set_pompe", "p": 2 , "t": 20},
+    # 53 : {"action": "set_pompe", "p": 3 , "t": 20}
 }
 
 map_note_off_to_arduino_action = {
     48 : {"action": "set_pompe", "p": 0 , "t": 0},
-    50 : {"action": "set_pompe", "p": 1 , "t": 0},
-    52 : {"action": "set_pompe", "p": 2 , "t": 0},
-    53 : {"action": "set_pompe", "p": 3 , "t": 0}
+    # 50 : {"action": "set_pompe", "p": 1 , "t": 0},
+    # 52 : {"action": "set_pompe", "p": 2 , "t": 0},
+    # 53 : {"action": "set_pompe", "p": 3 , "t": 0}
 }
 
 
