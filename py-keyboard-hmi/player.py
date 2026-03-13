@@ -1,12 +1,12 @@
 import myglobal
 from myglobal import logger
 import arduinocomm
-from arduinocomm import send_cmd
 import json
 import sched
 import time
 from pathlib import Path
 import csv
+import requests
 
 max_duration = 60 * 5
 
@@ -23,8 +23,15 @@ def callback_generator(command):
     
     def new_callback():
         logger.info(f"trigger command: {command}")
-        send_cmd(command)
-    
+        params = command.split('?')[1].split('&')
+        p = params[0].split('=')[1]
+        t = params[1].split('=')[1]
+        data = {"action": "set_pompe", "p": int(p) , "t": float(t)}
+        url = myglobal.arduino_api() + "/command"
+        logger.info(f"player: send: {url}, json={data}")
+        
+        requests.post(url, json=data)
+       
     return new_callback
 
 
@@ -200,7 +207,7 @@ if __name__ == "__main__":
     # setup the arduino serial connection -> needed to communicate with arduino
     
     
-    arduinocomm.setup()
+    #arduinocomm.setup()
 
     time.sleep(1)  # wait for the serial connection to be established
     
