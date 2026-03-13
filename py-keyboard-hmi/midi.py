@@ -29,15 +29,21 @@ map_note_on_to_filter_action = {
     120 : {"action": "filter_group_on", "filter_group_id": "h"},
     121 : {"action": "filter_group_on", "filter_group_id": "s"},
     122 : {"action": "filter_group_on", "filter_group_id": "b"},
-    127 : {"action": "filter_group_on", "filter_group_id": "rgb"},
+    
+    124 : {"action": "filter_group_on", "filter_group_id": "r"},
+    125 : {"action": "filter_group_on", "filter_group_id": "g"},
+    126 : {"action": "filter_group_on", "filter_group_id": "blue"},
 }
 
 map_note_off_to_filter_action = {
     120 : {"action": "filter_group_off", "filter_group_id": "h"},
     121 : {"action": "filter_group_off", "filter_group_id": "s"},
     122 : {"action": "filter_group_off", "filter_group_id": "b"},
-    127 : {"action": "filter_group_off", "filter_group_id": "rgb"},
-}
+    
+    124 : {"action": "filter_group_off", "filter_group_id": "r"},
+    125 : {"action": "filter_group_off", "filter_group_id": "g"},
+    126 : {"action": "filter_group_off", "filter_group_id": "blue"}
+ }
 
 map_note_on_to_arduino_action = {
     48 : {"action": "set_pompe", "p": 0 , "t": 20},

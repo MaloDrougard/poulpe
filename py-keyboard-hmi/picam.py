@@ -25,17 +25,19 @@ class Capture2Fullscreen():
 
         
         self.enable_h_filter = False
-        self.hue = 0
+        self.hue = 0.5
         self.enable_s_filter = False
-        self.saturation = 1.0
+        self.saturation = 1.5
         self.enable_b_filter = False
-        self.brightness = 0
+        self.brightness = 0.5
         
         # RGB filter
-        self.enable_rgb_filter = False
-        self.red = 1.0
-        self.green = 1.0
-        self.blue = 1.0
+        self.enable_r_filter = False
+        self.red = 2.0
+        self.enable_g_filter = False
+        self.green = 2.0
+        self.enable_blue_filter = False
+        self.blue = 2.0
         
         
         # variable for the function update_and_log_fps
@@ -74,8 +76,13 @@ class Capture2Fullscreen():
             # Convert HSV to BGR before displaying
             bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
-            if self.enable_rgb_filter:
-                bgr = self.filter_rgb(bgr, self.red, self.green, self.blue)
+            if self.enable_r_filter:
+                bgr = self.filter_rgb(bgr, self.red)
+            if self.enable_g_filter:
+                bgr = self.filter_rgb(bgr, self.green)
+            if self.enable_blue_filter:
+                bgr = self.filter_rgb(bgr, self.blue)
+            
             
             cv2.imshow(window_name, bgr)
             
@@ -174,6 +181,18 @@ class Capture2Fullscreen():
         if filter_group_id == "b":
             self.enable_b_filter = True
             logger.info(f"enable_b_filter set to: {self.enable_b_filter}")
+   
+        if filter_group_id == "r":
+            self.enable_r_filter = True
+            logger.info(f"enable_r_filter set to: {self.enable_r_filter}")
+        if filter_group_id == "blue":
+            self.enable_blue_filter = True
+            logger.info(f"enable_b_filter set to: {self.enable_blue_filter}")
+        if filter_group_id == "g":
+            self.enable_g_filter = True
+            logger.info(f"enable_g_filter set to: {self.enable_g_filter}")
+ 
+ 
  
     def _handle_filter_group_off(self, data):
         """Handle toggle_filter_group action."""
@@ -187,8 +206,17 @@ class Capture2Fullscreen():
         if filter_group_id == "b":
             self.enable_b_filter= False
             logger.info(f"enable_hb_filter set to: {self.enable_b_filter}")
-        
-        
+   
+        if filter_group_id == "r":
+            self.enable_r_filter = False
+            logger.info(f"enable_r_filter set to: {self.enable_r_filter}")
+        if filter_group_id == "blue":
+            self.enable_blue_filter = False
+            logger.info(f"enable_b_filter set to: {self.enable_blue_filter}")
+        if filter_group_id == "g":
+            self.enable_g_filter = False
+            logger.info(f"enable_g_filter set to: {self.enable_g_filter}")
+ 
         
     def _setupcapture(self):
         if self.width == -1 or self.height == -1:
