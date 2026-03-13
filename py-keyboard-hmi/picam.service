@@ -1,0 +1,17 @@
+[Unit]
+Description=Py Keyboard HMI PiCam Fullscreen Service
+After=graphical.target
+Wants=graphical.target
+
+[Service]
+Type=simple
+User=makem
+Group=makem
+WorkingDirectory=/home/makem/Git/poulpe/py-keyboard-hmi
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/makem/.Xauthority
+ExecStart=python3 /home/makem/Git/poulpe/py-keyboard-hmi/picam.py
+
+
+[Install]
+WantedBy=graphical.target

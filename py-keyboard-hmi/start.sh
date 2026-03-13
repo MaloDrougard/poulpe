@@ -1,2 +1,3 @@
-source venv/bin/activate
-sudo venv/bin/python main.py 
+python3 main.py
+
+
