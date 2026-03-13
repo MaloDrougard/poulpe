@@ -77,11 +77,11 @@ class Capture2Fullscreen():
             bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
             if self.enable_r_filter:
-                bgr = self.filter_rgb(bgr, self.red)
+                bgr = self.filter_rgb(bgr, red=self.red)
             if self.enable_g_filter:
-                bgr = self.filter_rgb(bgr, self.green)
+                bgr = self.filter_rgb(bgr, green=self.green)
             if self.enable_blue_filter:
-                bgr = self.filter_rgb(bgr, self.blue)
+                bgr = self.filter_rgb(bgr, blue=self.blue)
             
             
             cv2.imshow(window_name, bgr)
