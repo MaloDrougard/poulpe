@@ -33,7 +33,7 @@ Le fichier `picam.service` permet de lancer `picam.py` au démarrage graphique.
 Installation:
 
 ```bash
-sudo cp /home/makem/Git/poulpe/py-keyboard-hmi/picam.service /etc/systemd/system/
+sudo cp ./py-keyboard-hmi/picam.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl start picam.service
 ```

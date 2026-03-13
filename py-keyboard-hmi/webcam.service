@@ -7,7 +7,7 @@ Wants=graphical.target
 Type=simple
 User=makem
 Group=makem
-WorkingDirectory=/home/makem/Git/poulpe/py-keyboard-hmi
+WorkingDirectory=/home/makem/poulpe/py-keyboard-hmi
 Environment=DISPLAY=:0
 Environment=XAUTHORITY=/home/makem/.Xauthority
 ExecStart=python3 /home/makem/Git/poulpe/py-keyboard-hmi/webcam.py
