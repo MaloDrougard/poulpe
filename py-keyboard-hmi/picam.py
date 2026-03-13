@@ -20,13 +20,15 @@ class Capture2Fullscreen():
         # message queue to recieve info from other THREAD
         self.messages = messages
 
-        self.width = -1
-        self.height = -1
+        self.width = 1920
+        self.height = 1080
 
         
-        self.enable_hsb_filter = False
+        self.enable_h_filter = False
         self.hue = 0
+        self.enable_s_filter = False
         self.saturation = 1.0
+        self.enable_b_filter = False
         self.brightness = 0
         
         # RGB filter
@@ -62,9 +64,13 @@ class Capture2Fullscreen():
             hsv = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)
             
             
-            if self.enable_hsb_filter: # self.enable_hsb_filter:    
-                hsv = self.filter_brightness_hue_saturation(hsv, self.brightness, self.hue, self.saturation)
-                   
+            if self.enable_h_filter:
+                hsv = self.filter_hue(hsv, self.hue)
+            if self.enable_s_filter:
+                hsv = self.filter_saturation(hsv, self.saturation)
+            if self.enable_b_filter:    
+                hsv = self.filter_brightness(hsv, self.brightness)          
+            
             # Convert HSV to BGR before displaying
             bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
@@ -113,11 +119,14 @@ class Capture2Fullscreen():
                 if not action:
                     logger.warning(f"message without action received, msg: {data}")
                     continue
-                
                 if action == "set_value":
                     self._handle_set_value(data)
                 elif action == "toggle_filter_group":
                     self._handle_toggle_filter(data)
+                elif action == "filter_group_on":
+                    self._handle_filter_group_on(data)
+                elif action == "filter_group_off":
+                    self._handle_filter_group_off(data)
                 else:
                     logger.warning(f"unknown action: {action}")
                     
@@ -145,17 +154,45 @@ class Capture2Fullscreen():
     def _handle_toggle_filter(self, data):
         """Handle toggle_filter_group action."""
         filter_group_id = data.get("filter_group_id")
-        if filter_group_id == "hsb":
-            self.enable_hsb_filter = not self.enable_hsb_filter
-            logger.info(f"enable_hsb_filter set to: {self.enable_hsb_filter}")
-        elif filter_group_id == "rgb":
-            self.enable_rgb_filter = not self.enable_rgb_filter
-            logger.info(f"enable_rgb_filter set to: {self.enable_rgb_filter}")
+        logger.warning("this function is not implemented")
+        # if filter_group_id == "hsb":
+        #     self.enable_hsb_filter = not self.enable_hsb_filter
+        #     logger.info(f"enable_hsb_filter set to: {self.enable_hsb_filter}")
+        # elif filter_group_id == "rgb":
+        #     self.enable_rgb_filter = not self.enable_rgb_filter
+        #     logger.info(f"enable_rgb_filter set to: {self.enable_rgb_filter}")
 
+    def _handle_filter_group_on(self, data):
+        """Handle toggle_filter_group action."""
+        filter_group_id = data.get("filter_group_id")
+        if filter_group_id == "h":
+            self.enable_h_filter = True
+            logger.info(f"enable_h_filter set to: {self.enable_h_filter}")
+        if filter_group_id == "s":
+            self.enable_s_filter = True
+            logger.info(f"enable_s_filter set to: {self.enable_s_filter}")
+        if filter_group_id == "b":
+            self.enable_b_filter = True
+            logger.info(f"enable_b_filter set to: {self.enable_b_filter}")
+ 
+    def _handle_filter_group_off(self, data):
+        """Handle toggle_filter_group action."""
+        filter_group_id = data.get("filter_group_id")
+        if filter_group_id == "h":
+            self.enable_h_filter = False
+            logger.info(f"enable_h_filter set to: {self.enable_h_filter}")
+        if filter_group_id == "s":
+            self.enable_s_filter = False
+            logger.info(f"enable_s_filter set to: {self.enable_s_filter}")
+        if filter_group_id == "b":
+            self.enable_b_filter= False
+            logger.info(f"enable_hb_filter set to: {self.enable_b_filter}")
+        
+        
+        
     def _setupcapture(self):
-        
-        width, height = getScreenWidthAndHeight()
-        
+        if self.width == -1 or self.height == -1:
+            width, height = getScreenWidthAndHeight()        
         if self.width == -1:
             self.width = width
         if self.height == -1:
@@ -172,33 +209,47 @@ class Capture2Fullscreen():
         return picam
 
        
-    def filter_brightness_hue_saturation(self, frame, brightness=0, hue=0, saturation=1.0):
+    def filter_hue(self, frame, hue=0):
         """
-        Apply brightness, hue, and saturation adjustments to frame.
-        
+        Apply hue shift to an HSV frame.
+
         Args:
-            frame: Input frame in BGR format
-            brightness: Brightness adjustment (-100 to 100)
-            hue: Hue shift (0 to 180)
+            frame: Input frame in HSV format
+            hue: Hue shift (-180 to 180)
+        """
+        logger.debug(f"hue={hue}")
+
+        hsv = frame.astype(float)
+        hsv[:, :, 0] = (hsv[:, :, 0] + hue) % 180
+        return hsv.astype('uint8')
+
+    def filter_saturation(self, frame, saturation=1.0):
+        """
+        Apply saturation multiplier to an HSV frame.
+
+        Args:
+            frame: Input frame in HSV format
             saturation: Saturation multiplier (0.0 to 2.0)
         """
-        
-        logger.debug(f"brightness={brightness}, hue={hue}, saturation={saturation}")
-        
+        logger.debug(f"saturation={saturation}")
+
         hsv = frame.astype(float)
-        
-        # Adjust hue
-        hsv[:, :, 0] = (hsv[:, :, 0] + hue) % 180
-        
-        # Adjust saturation
         hsv[:, :, 1] = np.clip(hsv[:, :, 1] * saturation, 0, 255)
-        
-        # Adjust brightness (value channel)
+        return hsv.astype('uint8')
+
+    def filter_brightness(self, frame, brightness=0):
+        """
+        Apply brightness offset to an HSV frame.
+
+        Args:
+            frame: Input frame in HSV format
+            brightness: Brightness adjustment (-100 to 100)
+        """
+        logger.debug(f"brightness={brightness}")
+
+        hsv = frame.astype(float)
         hsv[:, :, 2] = np.clip(hsv[:, :, 2] + brightness, 0, 255)
-        
-        # Convert back to BGR
-        hsv = hsv.astype('uint8')
-        return hsv
+        return hsv.astype('uint8')
     
     
     def filter_invert_luminance(self, frame):

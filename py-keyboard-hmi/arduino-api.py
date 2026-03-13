@@ -80,7 +80,7 @@ def run_api(host='0.0.0.0', port=5001, debug=False):
 
 if __name__ == "__main__":
     # setup can be commented out if we want to fake the command 
-    #arduinocomm.setup()
+    arduinocomm.setup()
     run_read_arduino_serial()
     run_api(port=5001, debug=True)
-    #arduinocomm.setdown()
+    arduinocomm.setdown()

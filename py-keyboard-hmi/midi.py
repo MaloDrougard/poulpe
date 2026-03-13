@@ -26,8 +26,17 @@ map_contol_to_filter_value = {
 }
 
 map_note_on_to_filter_action = {
-    123 : {"action": "toggle_filter_group", "filter_group_id": "hsb"},
-    127 : {"action": "toggle_filter_group", "filter_group_id": "rgb"},
+    120 : {"action": "filter_group_on", "filter_group_id": "h"},
+    121 : {"action": "filter_group_on", "filter_group_id": "s"},
+    122 : {"action": "filter_group_on", "filter_group_id": "b"},
+    127 : {"action": "filter_group_on", "filter_group_id": "rgb"},
+}
+
+map_note_off_to_filter_action = {
+    120 : {"action": "filter_group_off", "filter_group_id": "h"},
+    121 : {"action": "filter_group_off", "filter_group_id": "s"},
+    122 : {"action": "filter_group_off", "filter_group_id": "b"},
+    127 : {"action": "filter_group_off", "filter_group_id": "rgb"},
 }
 
 map_note_on_to_arduino_action = {
@@ -54,6 +63,12 @@ def note_off_change(msg):
             url = arduino_api() + "/command"
             logger.info(f"midi: send: {url}, json={action_arduino}")
             requests.post(url, json=action_arduino)
+     
+        action_filter = map_note_off_to_filter_action.get(msg.note)
+        if action_filter:
+            url = display_api() + "/filter"
+            logger.info(f"midi: send: {url}, json={action_filter}")
+            requests.post(url, json=action_filter)    
             
     except Exception as e:
         logger.error(f"Error sending note off message: {e}")
