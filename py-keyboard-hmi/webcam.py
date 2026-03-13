@@ -71,4 +71,4 @@ def list_webcam():
 if __name__ == "__main__":
     list_webcam()
     print("start fullscree, escape with Q")
-    capture2fullscreen(5)
+    capture2fullscreen(2)
