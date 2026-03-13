@@ -44,7 +44,7 @@ def send_cmd(command: str):
        return 
     ser.write((command + '\n').encode('utf-8'))
     logger.info(f"Sent command: {command}")
-    
+    time.sleep(sleep_write)
 
 if __name__ == "__main__":
     setup()
